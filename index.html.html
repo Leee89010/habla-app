@@ -1,0 +1,433 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --c1:#FF6B35;--c2:#FFD166;--c3:#06D6A0;--c4:#118AB2;--c5:#073B4C;
+    --bg:#0A0E1A;--card:#131929;--card2:#1C2540;--text:#F0F4FF;--muted:#8A95B0;
+    --radius:18px;--radius-sm:10px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:600px;overflow:hidden;user-select:none}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;transition:all .45s cubic-bezier(.4,0,.2,1);opacity:0;transform:translateX(60px);pointer-events:none}
+  .screen.active{opacity:1;transform:translateX(0);pointer-events:all}
+  .screen.exit{opacity:0;transform:translateX(-60px)}
+
+  /* SPLASH */
+  #s-splash{background:var(--bg);align-items:center;justify-content:center;gap:0}
+  .splash-glow{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,53,.25) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse 3s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+  .logo-wrap{position:relative;z-index:1;text-align:center}
+  .logo-emoji{font-size:72px;display:block;margin-bottom:12px;animation:float 3s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .logo-title{font-family:'Unbounded',sans-serif;font-size:42px;font-weight:900;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px}
+  .logo-sub{font-size:14px;color:var(--muted);margin-top:6px;letter-spacing:3px;text-transform:uppercase}
+  .splash-btn{margin-top:48px;background:linear-gradient(135deg,var(--c1),#FF8C55);color:#fff;border:none;padding:18px 48px;border-radius:100px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 8px 32px rgba(255,107,53,.4)}
+  .splash-btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,107,53,.5)}
+  .splash-btn:active{transform:translateY(0)}
+
+  /* ONBOARDING */
+  #s-onboard{padding:40px 32px 32px;gap:0}
+  .progress-dots{display:flex;gap:8px;justify-content:center;margin-bottom:32px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--card2);transition:all .3s}
+  .dot.active{background:var(--c1);width:24px;border-radius:4px}
+  .onboard-content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px}
+  .big-emoji{font-size:80px;animation:float 3s ease-in-out infinite}
+  .ob-title{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;line-height:1.3}
+  .ob-sub{color:var(--muted);font-size:15px;line-height:1.6;max-width:280px}
+  .ob-choices{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:8px}
+  .ob-choice{background:var(--card);border:1.5px solid transparent;border-radius:var(--radius-sm);padding:14px 18px;font-size:15px;cursor:pointer;transition:all .25s;text-align:left;display:flex;align-items:center;gap:12px}
+  .ob-choice:hover{border-color:var(--c1);background:rgba(255,107,53,.08)}
+  .ob-choice.sel{border-color:var(--c1);background:rgba(255,107,53,.12);color:var(--c1);font-weight:500}
+  .ob-choice-icon{font-size:20px;width:28px;text-align:center}
+  .nav-btn{width:100%;padding:16px;border-radius:100px;border:none;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .25s}
+  .nav-btn.primary{background:linear-gradient(135deg,var(--c1),#FF8C55);color:#fff;box-shadow:0 6px 24px rgba(255,107,53,.35)}
+  .nav-btn.primary:hover{transform:translateY(-1px);box-shadow:0 10px 30px rgba(255,107,53,.45)}
+  .nav-btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+  /* LEVEL TEST */
+  #s-test{padding:24px 28px;gap:16px}
+  .test-header{display:flex;align-items:center;justify-content:space-between}
+  .test-counter{font-size:13px;color:var(--muted);font-weight:500}
+  .test-progress{height:6px;background:var(--card2);border-radius:3px;overflow:hidden;flex:1;margin:0 16px}
+  .test-bar{height:100%;background:linear-gradient(90deg,var(--c1),var(--c2));border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .test-category{font-size:11px;color:var(--c1);letter-spacing:2px;text-transform:uppercase;font-weight:600}
+  .test-q{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;line-height:1.4;margin:8px 0 20px}
+  .test-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+  .test-opt{background:var(--card);border:1.5px solid rgba(255,255,255,.06);border-radius:var(--radius-sm);padding:16px 12px;text-align:center;font-size:14px;font-weight:500;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;min-height:64px}
+  .test-opt:hover{border-color:rgba(255,255,255,.2);background:var(--card2)}
+  .test-opt.correct{border-color:var(--c3);background:rgba(6,214,160,.12);color:var(--c3);animation:bounce .3s}
+  .test-opt.wrong{border-color:#FF4D4D;background:rgba(255,77,77,.1);color:#FF6B6B}
+  @keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  .word-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:24px;text-align:center;margin-bottom:4px}
+  .word-es{font-family:'Unbounded',sans-serif;font-size:32px;font-weight:900;color:var(--c2);margin-bottom:4px}
+  .word-hint{font-size:12px;color:var(--muted)}
+  .feedback-strip{height:52px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;transition:all .3s;opacity:0}
+  .feedback-strip.show{opacity:1}
+  .feedback-strip.ok{background:rgba(6,214,160,.15);color:var(--c3)}
+  .feedback-strip.ko{background:rgba(255,77,77,.1);color:#FF6B6B}
+
+  /* RESULT */
+  #s-result{padding:40px 32px;align-items:center;justify-content:center;gap:0;text-align:center}
+  .result-badge{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--c2));display:flex;align-items:center;justify-content:center;font-size:56px;margin:0 auto 24px;box-shadow:0 16px 48px rgba(255,107,53,.4);animation:pop .5s cubic-bezier(.34,1.56,.64,1) .2s both}
+  @keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+  .level-tag{font-family:'Unbounded',sans-serif;font-size:13px;letter-spacing:3px;color:var(--c1);text-transform:uppercase;margin-bottom:8px}
+  .result-title{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:900;margin-bottom:12px}
+  .result-desc{color:var(--muted);font-size:15px;line-height:1.6;max-width:280px;margin:0 auto 32px}
+  .stats-row{display:flex;gap:16px;margin-bottom:32px;width:100%}
+  .stat-card{flex:1;background:var(--card);border-radius:var(--radius-sm);padding:16px;border:1px solid rgba(255,255,255,.06)}
+  .stat-val{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;color:var(--c2)}
+  .stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:1px;text-transform:uppercase}
+
+  /* DASHBOARD */
+  #s-dash{padding:24px 24px 16px;gap:16px;overflow-y:auto}
+  .dash-header{display:flex;align-items:center;justify-content:space-between}
+  .dash-greet{font-size:12px;color:var(--muted)}
+  .dash-name{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;margin-top:2px}
+  .streak-badge{background:linear-gradient(135deg,#FF9500,var(--c1));padding:8px 14px;border-radius:100px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .xp-bar-wrap{background:var(--card);border-radius:var(--radius);padding:16px}
+  .xp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px}
+  .xp-level{font-family:'Unbounded',sans-serif;font-size:12px;color:var(--c1);letter-spacing:1px}
+  .xp-track{height:10px;background:var(--card2);border-radius:5px;overflow:hidden}
+  .xp-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--c1),var(--c2));width:62%;transition:width 1s cubic-bezier(.4,0,.2,1)}
+  .section-title{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .lessons-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .lesson-card{background:var(--card);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .25s;border:1.5px solid transparent;position:relative;overflow:hidden}
+  .lesson-card:hover{border-color:var(--c1);transform:translateY(-2px)}
+  .lesson-card.locked{opacity:.5;cursor:not-allowed}
+  .lesson-card.locked:hover{transform:none;border-color:transparent}
+  .lesson-icon{font-size:28px;margin-bottom:8px;display:block}
+  .lesson-title{font-size:14px;font-weight:600;margin-bottom:4px}
+  .lesson-prog{font-size:11px;color:var(--muted)}
+  .lesson-bar{height:3px;background:var(--card2);border-radius:2px;margin-top:10px;overflow:hidden}
+  .lesson-fill{height:100%;background:linear-gradient(90deg,var(--c3),var(--c4));border-radius:2px}
+  .done-badge{position:absolute;top:10px;right:10px;width:20px;height:20px;background:var(--c3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px}
+  .daily-card{background:linear-gradient(135deg,var(--c4),#0A5276);border-radius:var(--radius);padding:18px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:transform .2s}
+  .daily-card:hover{transform:translateY(-2px)}
+  .daily-icon{font-size:40px}
+  .daily-text .t{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700}
+  .daily-text .s{font-size:12px;color:rgba(255,255,255,.7);margin-top:4px}
+  .daily-arrow{margin-left:auto;font-size:20px;opacity:.8}
+
+  /* LESSON */
+  #s-lesson{padding:24px 28px;gap:16px}
+  .lesson-header{display:flex;align-items:center;gap:12px}
+  .back-btn{width:36px;height:36px;border-radius:50%;background:var(--card);border:none;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+  .back-btn:hover{background:var(--card2)}
+  .lesson-hearts{display:flex;gap:4px;margin-left:auto}
+  .heart{font-size:18px;transition:all .3s}
+  .lesson-q-card{background:var(--card);border-radius:var(--radius);padding:24px;flex:1;display:flex;flex-direction:column;gap:16px}
+  .q-type{font-size:11px;color:var(--c1);letter-spacing:2px;text-transform:uppercase;font-weight:600}
+  .q-text{font-size:18px;font-weight:600;line-height:1.5}
+  .q-audio{background:rgba(17,138,178,.15);border:1px solid rgba(17,138,178,.3);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .25s}
+  .q-audio:hover{background:rgba(17,138,178,.25)}
+  .audio-icon{width:40px;height:40px;background:var(--c4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .audio-text{font-size:14px;color:var(--muted)}
+  .answer-area{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;background:var(--card2);border-radius:var(--radius-sm);padding:12px;border:1px dashed rgba(255,255,255,.12)}
+  .word-token{background:var(--card);border:1.5px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+  .word-token:hover{border-color:var(--c1);background:rgba(255,107,53,.1)}
+  .word-token.placed{background:rgba(17,138,178,.15);border-color:var(--c4);color:var(--c4)}
+  .word-bank{display:flex;flex-wrap:wrap;gap:8px}
+  .check-btn{width:100%;padding:16px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--c3),#04A37A);color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all .25s;box-shadow:0 6px 24px rgba(6,214,160,.3)}
+  .check-btn:hover{transform:translateY(-1px);box-shadow:0 10px 30px rgba(6,214,160,.4)}
+
+  /* XP TOAST */
+  .xp-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;padding:10px 20px;border-radius:100px;font-weight:700;font-size:14px;z-index:999;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+  .xp-toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+
+<div class="xp-toast" id="xpToast">+10 XP ⚡</div>
+
+<!-- SPLASH -->
+<div class="screen active" id="s-splash">
+  <div class="splash-glow"></div>
+  <div class="logo-wrap">
+    <span class="logo-emoji">🇪🇸</span>
+    <div class="logo-title">Habla</div>
+    <div class="logo-sub">Apprends l'espagnol</div>
+    <button class="splash-btn" onclick="go('s-onboard',0)">Commencer gratuitement</button>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="screen" id="s-onboard">
+  <div class="progress-dots">
+    <div class="dot active" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+  </div>
+  <div class="onboard-content" id="ob-content"></div>
+  <button class="nav-btn primary" id="ob-next" onclick="obNext()" disabled>Continuer →</button>
+</div>
+
+<!-- LEVEL TEST -->
+<div class="screen" id="s-test">
+  <div class="test-header">
+    <span class="test-counter" id="q-counter">1 / 5</span>
+    <div class="test-progress"><div class="test-bar" id="q-bar" style="width:20%"></div></div>
+    <span style="font-size:11px;color:var(--muted)" id="q-score">Score: 0</span>
+  </div>
+  <div class="test-category" id="q-cat">VOCABULAIRE</div>
+  <div class="test-q" id="q-text"></div>
+  <div id="q-extra"></div>
+  <div class="test-options" id="q-opts"></div>
+  <div class="feedback-strip" id="q-feedback"></div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="s-result">
+  <div class="result-badge" id="res-emoji">🌱</div>
+  <div class="level-tag" id="res-tag">NIVEAU</div>
+  <div class="result-title" id="res-title">Débutant</div>
+  <div class="result-desc" id="res-desc">Tu commences l'aventure !</div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="res-score">0%</div><div class="stat-lbl">Score</div></div>
+    <div class="stat-card"><div class="stat-val" id="res-correct">0/5</div><div class="stat-lbl">Bonnes réponses</div></div>
+    <div class="stat-card"><div class="stat-val" id="res-xp">0 XP</div><div class="stat-lbl">Gagnés</div></div>
+  </div>
+  <button class="nav-btn primary" onclick="go('s-dash')">Voir mon parcours →</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="s-dash">
+  <div class="dash-header">
+    <div><div class="dash-greet">Buenos días, 👋</div><div class="dash-name">Léo</div></div>
+    <div class="streak-badge">🔥 3 jours</div>
+  </div>
+  <div class="xp-bar-wrap">
+    <div class="xp-top">
+      <span class="xp-level">NIVEAU 2 · VOYAGEUR</span>
+      <span style="font-size:13px;color:var(--muted)">620 / 1000 XP</span>
+    </div>
+    <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+  </div>
+  <div class="section-title">Leçons du jour</div>
+  <div class="lessons-grid">
+    <div class="lesson-card" onclick="go('s-lesson')">
+      <span class="lesson-icon">💬</span>
+      <div class="lesson-title">Salutations</div>
+      <div class="lesson-prog">3/5 exercices</div>
+      <div class="lesson-bar"><div class="lesson-fill" style="width:60%"></div></div>
+    </div>
+    <div class="lesson-card" onclick="go('s-lesson')">
+      <span class="lesson-icon">🍎</span>
+      <div class="lesson-title">La nourriture</div>
+      <div class="lesson-prog">Nouveau !</div>
+      <div class="lesson-bar"><div class="lesson-fill" style="width:0%"></div></div>
+    </div>
+    <div class="lesson-card" onclick="go('s-lesson')">
+      <div class="done-badge">✓</div>
+      <span class="lesson-icon">🏠</span>
+      <div class="lesson-title">La maison</div>
+      <div class="lesson-prog">Complété !</div>
+      <div class="lesson-bar"><div class="lesson-fill" style="width:100%"></div></div>
+    </div>
+    <div class="lesson-card locked">
+      <span class="lesson-icon">🔒</span>
+      <div class="lesson-title">Les verbes</div>
+      <div class="lesson-prog">Niveau 3 requis</div>
+      <div class="lesson-bar"><div class="lesson-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="section-title">Défi du jour</div>
+  <div class="daily-card" onclick="go('s-lesson')">
+    <div class="daily-icon">⚡</div>
+    <div class="daily-text">
+      <div class="t">5 minutes chrono</div>
+      <div class="s">Maintiens ton streak · +50 XP bonus</div>
+    </div>
+    <div class="daily-arrow">›</div>
+  </div>
+</div>
+
+<!-- LESSON -->
+<div class="screen" id="s-lesson">
+  <div class="lesson-header">
+    <button class="back-btn" onclick="go('s-dash')">‹</button>
+    <div class="test-progress" style="flex:1"><div class="test-bar" style="width:40%"></div></div>
+    <div class="lesson-hearts">
+      <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
+    </div>
+  </div>
+  <div class="lesson-q-card">
+    <div class="q-type">🔊 ÉCOUTE ET TRADUIS</div>
+    <div class="q-text">Écoute et traduis la phrase en français</div>
+    <div class="q-audio" onclick="playAudio()">
+      <div class="audio-icon">🔊</div>
+      <div>
+        <div style="font-size:15px;font-weight:600">Buenos días</div>
+        <div class="audio-text">Appuie pour écouter</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--muted)">Compose la traduction :</div>
+    <div class="answer-area" id="answerArea">
+      <span style="color:var(--muted);font-size:13px;align-self:center">Glisse les mots ici...</span>
+    </div>
+    <div class="word-bank" id="wordBank">
+      <div class="word-token" onclick="placeWord(this,'Bonjour')">Bonjour</div>
+      <div class="word-token" onclick="placeWord(this,'Bonsoir')">Bonsoir</div>
+      <div class="word-token" onclick="placeWord(this,'matin')">matin</div>
+      <div class="word-token" onclick="placeWord(this,'Bonne')">Bonne</div>
+      <div class="word-token" onclick="placeWord(this,'nuit')">nuit</div>
+    </div>
+  </div>
+  <button class="check-btn" onclick="checkLesson()">Vérifier ✓</button>
+</div>
+
+<script>
+const screens=['s-splash','s-onboard','s-test','s-result','s-dash','s-lesson'];
+let currentScreen='s-splash';
+
+function go(id){
+  document.getElementById(currentScreen).classList.remove('active');
+  document.getElementById(currentScreen).classList.add('exit');
+  setTimeout(()=>{document.getElementById(currentScreen).classList.remove('exit')},450);
+  document.getElementById(id).classList.add('active');
+  currentScreen=id;
+  if(id==='s-onboard')initOnboard();
+  if(id==='s-test')initTest();
+  if(id==='s-dash'){setTimeout(()=>{document.getElementById('xpFill').style.width='62%'},300)}
+}
+
+// ONBOARDING
+const obSteps=[
+  {emoji:'🎯',title:'Quel est ton objectif ?',sub:'Choisis ton but principal',choices:[
+    {icon:'✈️',text:'Voyager en Espagne'},
+    {icon:'💼',text:'Travailler en espagnol'},
+    {icon:'🎬',text:'Comprendre les films'},
+    {icon:'🏆',text:'Maîtriser la langue'},
+  ]},
+  {emoji:'⏰',title:'Combien de temps par jour ?',sub:'Adapte à ton emploi du temps',choices:[
+    {icon:'⚡',text:'5 min / jour (casual)'},
+    {icon:'🔥',text:'10 min / jour (régulier)'},
+    {icon:'💪',text:'20 min / jour (intensif)'},
+    {icon:'🚀',text:'30 min+ / jour (expert)'},
+  ]},
+  {emoji:'🧠',title:'Ton niveau actuel ?',sub:'Sois honnête pour personnaliser',choices:[
+    {icon:'🌱',text:'Zéro connaissance'},
+    {icon:'🌿',text:'Quelques mots'},
+    {icon:'🌳',text:'Bases acquises'},
+    {icon:'🏔️',text:'Intermédiaire+'},
+  ]}
+];
+let obStep=0,obSel=-1;
+
+function initOnboard(){obStep=0;renderOb()}
+function renderOb(){
+  const s=obSteps[obStep];
+  document.querySelectorAll('.dot').forEach((d,i)=>{d.className='dot'+(i===obStep?' active':'')});
+  const c=document.getElementById('ob-content');
+  c.innerHTML=`<div class="big-emoji">${s.emoji}</div><div class="ob-title">${s.title}</div><div class="ob-sub">${s.sub}</div><div class="ob-choices">${s.choices.map((ch,i)=>`<div class="ob-choice" onclick="selOb(${i})"><span class="ob-choice-icon">${ch.icon}</span>${ch.text}</div>`).join('')}</div>`;
+  obSel=-1;document.getElementById('ob-next').disabled=true;
+}
+function selOb(i){
+  document.querySelectorAll('.ob-choice').forEach((c,j)=>c.className='ob-choice'+(j===i?' sel':''));
+  obSel=i;document.getElementById('ob-next').disabled=false;
+}
+function obNext(){
+  if(obSel<0)return;
+  obStep++;
+  if(obStep>=obSteps.length){go('s-test');return;}
+  renderOb();
+}
+
+// LEVEL TEST
+const questions=[
+  {cat:'VOCABULAIRE',q:'Que signifie "Hola" ?',opts:['Bonjour','Au revoir','Merci','S\'il vous plaît'],ans:0,word:null},
+  {cat:'VOCABULAIRE',q:'Quel mot signifie "maison" ?',opts:['perro','casa','agua','libro'],ans:1,word:null},
+  {cat:'GRAMMAIRE',q:'Complète : "Yo ___ español"',opts:['habla','hablo','hablas','hablan'],ans:1,word:null},
+  {cat:'TRADUCTION',q:'Traduis : "El gato es negro"',opts:['Le chien est blanc','Le chat est noir','Le chien est noir','Le chat est blanc'],ans:1,word:null},
+  {cat:'VOCABULAIRE',q:'Quel mot désigne "eau" ?',opts:['leche','vino','agua','zumo'],ans:2,word:null},
+];
+let qIdx=0,qScore=0,answered=false;
+
+function initTest(){qIdx=0;qScore=0;answered=false;renderQ()}
+function renderQ(){
+  const q=questions[qIdx];
+  document.getElementById('q-counter').textContent=`${qIdx+1} / ${questions.length}`;
+  document.getElementById('q-bar').style.width=`${((qIdx+1)/questions.length)*100}%`;
+  document.getElementById('q-score').textContent=`Score: ${qScore}`;
+  document.getElementById('q-cat').textContent=q.cat;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-extra').innerHTML='';
+  document.getElementById('q-feedback').className='feedback-strip';
+  document.getElementById('q-opts').innerHTML=q.opts.map((o,i)=>`<div class="test-opt" onclick="answerQ(${i})">${o}</div>`).join('');
+  answered=false;
+}
+function answerQ(i){
+  if(answered)return;answered=true;
+  const q=questions[qIdx];
+  const opts=document.querySelectorAll('.test-opt');
+  const fb=document.getElementById('q-feedback');
+  if(i===q.ans){
+    opts[i].classList.add('correct');
+    fb.textContent='✓ Parfait !  Bien joué !';fb.className='feedback-strip show ok';
+    qScore++;showXP();
+  }else{
+    opts[i].classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    fb.textContent=`✗ La bonne réponse était : "${q.opts[q.ans]}"`;fb.className='feedback-strip show ko';
+  }
+  setTimeout(()=>{qIdx++;if(qIdx>=questions.length){showResult()}else{renderQ()}},1400);
+}
+function showResult(){
+  const pct=Math.round((qScore/questions.length)*100);
+  let emoji,tag,title,desc;
+  if(pct<=40){emoji='🌱';tag='DÉBUTANT · A0';title='Tu débutes !';desc='Pas d\'inquiétude, tout le monde commence quelque part. Ton parcours est personnalisé pour toi.'}
+  else if(pct<=70){emoji='🌿';tag='INTERMÉDIAIRE · A2';title='Bonne base !';desc='Tu connais les fondamentaux. On va consolider et aller plus loin rapidement.'}
+  else{emoji='🏔️';tag='AVANCÉ · B1+';title='Impressionnant !';desc='Tu as de solides bases ! Ton parcours sera exigeant et stimulant.'}
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-tag').textContent=tag;
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-desc').textContent=desc;
+  document.getElementById('res-score').textContent=pct+'%';
+  document.getElementById('res-correct').textContent=qScore+'/'+questions.length;
+  document.getElementById('res-xp').textContent=(qScore*10)+' XP';
+  go('s-result');
+}
+
+// LESSON
+let placed=[];
+function placeWord(el,w){
+  if(el.classList.contains('placed'))return;
+  el.classList.add('placed');
+  const area=document.getElementById('answerArea');
+  if(placed.length===0)area.innerHTML='';
+  placed.push(w);
+  const t=document.createElement('div');
+  t.className='word-token';t.textContent=w;
+  t.onclick=()=>{
+    placed=placed.filter(x=>x!==w);
+    t.remove();el.classList.remove('placed');
+    if(placed.length===0)area.innerHTML='<span style="color:var(--muted);font-size:13px;align-self:center">Glisse les mots ici...</span>';
+  };
+  area.appendChild(t);
+}
+function checkLesson(){
+  const correct=placed.join(' ')==='Bonjour matin'||placed.includes('Bonjour');
+  const fb=document.getElementById('q-feedback');
+  if(correct||placed.length>0){
+    showXP();
+    setTimeout(()=>go('s-dash'),1200);
+  }
+}
+function playAudio(){
+  const el=document.querySelector('.q-audio');
+  el.style.borderColor='var(--c3)';
+  if('speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance('Buenos días');
+    u.lang='es-ES';u.rate=0.9;
+    speechSynthesis.speak(u);
+  }
+  setTimeout(()=>el.style.borderColor='rgba(17,138,178,.3)',1500);
+}
+
+// XP TOAST
+function showXP(){
+  const t=document.getElementById('xpToast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// Animate XP bar on load
+setTimeout(()=>{const f=document.getElementById('xpFill');if(f)f.style.width='62%'},500);
+</script>
