@@ -389,9 +389,13 @@ function renderLessonQ() {
   const card = document.getElementById('q-card');
 
   if (q.type === 'mcq') {
+    const hintHtml = q.hint
+      ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">${q.hint}</div>`
+      : '';
     card.innerHTML = `
       <div class="q-type-badge">${q.cat}</div>
       <div class="q-text">${q.q}</div>
+      ${hintHtml}
       <div class="lesson-opts">
         ${q.opts.map((o, i) => `
           <div class="lesson-opt" onclick="selectOpt(this,${i})">${o}</div>`).join('')}
