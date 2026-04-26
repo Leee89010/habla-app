@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Habla — Apprends l'espagnol</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇸</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ── XP TOAST ── -->
+  <div class="xp-toast" id="xpToast">+10 XP ⚡</div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 1 — SPLASH
+  ══════════════════════════════════════════ -->
+  <div class="screen active" id="s-splash">
+    <div class="splash-glow"></div>
+    <div class="logo-wrap">
+      <span class="logo-emoji">🇪🇸</span>
+      <div class="logo-title">Habla</div>
+      <div class="logo-sub">Apprends l'espagnol</div>
+      <button class="splash-btn" onclick="go('s-onboard')">Commencer gratuitement</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 2 — ONBOARDING (3 étapes)
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-onboard">
+    <div class="progress-dots">
+      <div class="dot active" id="d0"></div>
+      <div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div>
+    </div>
+    <div class="onboard-content" id="ob-content"></div>
+    <button class="nav-btn primary" id="ob-next" onclick="obNext()" disabled>Continuer →</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 3 — TEST DE NIVEAU
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-test">
+    <div class="test-header">
+      <span class="test-counter" id="q-counter">1 / 5</span>
+      <div class="test-progress">
+        <div class="test-bar" id="q-bar" style="width:20%"></div>
+      </div>
+      <span class="test-pts" id="q-score">0 pts</span>
+    </div>
+    <div class="test-category" id="q-cat"></div>
+    <div class="test-q" id="q-text"></div>
+    <div class="test-options" id="q-opts"></div>
+    <div class="feedback-strip" id="q-feedback"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 4 — RÉSULTAT TEST
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-result">
+    <div class="result-badge" id="res-emoji">🌱</div>
+    <div class="level-tag" id="res-tag">NIVEAU</div>
+    <div class="result-title" id="res-title">Débutant</div>
+    <div class="result-desc" id="res-desc"></div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="res-score">0%</div>
+        <div class="stat-lbl">Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="res-correct">0/5</div>
+        <div class="stat-lbl">Bonnes rép.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="res-xp">0 XP</div>
+        <div class="stat-lbl">Gagnés</div>
+      </div>
+    </div>
+    <button class="nav-btn primary" onclick="go('s-dash')">Voir mon parcours →</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 5 — DASHBOARD
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-dash">
+    <div class="dash-header">
+      <div>
+        <div class="dash-greet">Buenos días 👋</div>
+        <div class="dash-name">Léo</div>
+      </div>
+      <div class="streak-badge">🔥 <span id="streakCount">3</span> jours</div>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-top">
+        <span class="xp-level" id="xpLevelLabel">NIVEAU 2 · VOYAGEUR</span>
+        <span class="xp-count" id="xp-label">620 / 1000 XP</span>
+      </div>
+      <div class="xp-track">
+        <div class="xp-fill" id="xpFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="section-title">Leçons du jour</div>
+    <div class="lessons-grid" id="lessonsGrid"></div>
+    <div class="section-title">Défi du jour</div>
+    <div class="daily-card" onclick="startLesson('defi')">
+      <div class="daily-icon">⚡</div>
+      <div class="daily-text">
+        <div class="daily-title">5 minutes chrono</div>
+        <div class="daily-sub">Maintiens ton streak · +50 XP</div>
+      </div>
+      <div class="daily-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 6 — LEÇON (exercice)
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-lesson">
+    <div class="lesson-header">
+      <button class="back-btn" onclick="go('s-dash')">‹</button>
+      <div class="test-progress" style="flex:1">
+        <div class="test-bar" id="lesson-bar" style="width:0%"></div>
+      </div>
+      <div class="lesson-hearts" id="heartsDisplay"></div>
+    </div>
+    <div class="q-card" id="q-card"></div>
+    <div class="feedback-strip" id="lesson-feedback"></div>
+    <button class="check-btn" id="checkBtn" onclick="checkAnswer()" disabled>Vérifier ✓</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 7 — LEÇON TERMINÉE
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-lesson-done">
+    <div class="done-ring">🏆</div>
+    <div class="done-title">Leçon terminée !</div>
+    <div class="done-desc" id="done-desc"></div>
+    <div class="stats-row" style="margin-bottom:0">
+      <div class="stat-card">
+        <div class="stat-val" id="done-xp">0</div>
+        <div class="stat-lbl">XP gagnés</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="done-acc">0%</div>
+        <div class="stat-lbl">Précision</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="done-streak">0</div>
+        <div class="stat-lbl">Streak</div>
+      </div>
+    </div>
+    <button class="nav-btn primary" onclick="go('s-dash')">Retour au menu →</button>
+    <button class="nav-btn secondary" onclick="replayLesson()">Rejouer cette leçon 🔄</button>
+  </div>
+
+  <!-- ── Scripts (ordre important) ── -->
+  <script src="js/questions.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
