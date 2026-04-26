@@ -2,18 +2,37 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#FF6B35" />
+  <meta name="description" content="Apprends l'espagnol en t'amusant — leçons, défis, badges, streaks." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Habla" />
   <title>Habla — Apprends l'espagnol</title>
+  <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇸</text></svg>" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='42' fill='%23FF6B35'/><text x='96' y='130' font-size='110' text-anchor='middle' font-family='Arial'>🇪🇸</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 
   <!-- ── XP TOAST ── -->
   <div class="xp-toast" id="xpToast">+10 XP ⚡</div>
+
+  <!-- ── Achievement toast ── -->
+  <div class="ach-toast" id="achToast">
+    <div class="ach-toast-icon" id="achToastIcon">🏆</div>
+    <div>
+      <div class="ach-toast-label">Badge débloqué !</div>
+      <div class="ach-toast-name" id="achToastName"></div>
+    </div>
+  </div>
+
+  <!-- ── Confetti layer ── -->
+  <canvas id="confettiCanvas"></canvas>
 
   <!-- ══════════════════════════════════════════
        ÉCRAN 1 — SPLASH
@@ -25,17 +44,18 @@
       <div class="logo-title">Habla</div>
       <div class="logo-sub">Apprends l'espagnol</div>
       <button class="splash-btn" onclick="go('s-onboard')">Commencer gratuitement</button>
+      <div class="splash-version">Beta v1.0 · 100% gratuit</div>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════
-       ÉCRAN 2 — ONBOARDING (3 étapes)
+       ÉCRAN 2 — ONBOARDING (4 étapes)
   ══════════════════════════════════════════ -->
   <div class="screen" id="s-onboard">
-    <div class="progress-dots">
-      <div class="dot active" id="d0"></div>
-      <div class="dot" id="d1"></div>
-      <div class="dot" id="d2"></div>
+    <div class="ob-header">
+      <button class="back-btn ghost" id="ob-back" onclick="obPrev()">‹</button>
+      <div class="progress-dots" id="ob-dots"></div>
+      <div style="width:36px"></div>
     </div>
     <div class="onboard-content" id="ob-content"></div>
     <button class="nav-btn primary" id="ob-next" onclick="obNext()" disabled>Continuer →</button>
@@ -86,31 +106,58 @@
   <!-- ══════════════════════════════════════════
        ÉCRAN 5 — DASHBOARD
   ══════════════════════════════════════════ -->
-  <div class="screen" id="s-dash">
+  <div class="screen has-bottom-nav" id="s-dash">
     <div class="dash-header">
       <div>
-        <div class="dash-greet">Buenos días 👋</div>
-        <div class="dash-name">Léo</div>
+        <div class="dash-greet" id="dashGreet">Buenos días 👋</div>
+        <div class="dash-name" id="dashName">Amigo</div>
       </div>
-      <div class="streak-badge">🔥 <span id="streakCount">3</span> jours</div>
+      <div class="streak-badge" onclick="showStreakInfo()">🔥 <span id="streakCount">0</span></div>
     </div>
+
+    <!-- Daily goal progress -->
+    <div class="goal-card">
+      <div class="goal-row">
+        <div>
+          <div class="goal-label">Objectif du jour</div>
+          <div class="goal-value"><span id="goalCurrent">0</span> / <span id="goalTarget">20</span> XP</div>
+        </div>
+        <div class="goal-emoji" id="goalEmoji">🎯</div>
+      </div>
+      <div class="xp-track"><div class="xp-fill goal-fill" id="goalFill" style="width:0%"></div></div>
+    </div>
+
     <div class="xp-bar-wrap">
       <div class="xp-top">
-        <span class="xp-level" id="xpLevelLabel">NIVEAU 2 · VOYAGEUR</span>
-        <span class="xp-count" id="xp-label">620 / 1000 XP</span>
+        <span class="xp-level" id="xpLevelLabel">DÉBUTANT · A0</span>
+        <span class="xp-count" id="xp-label">0 XP</span>
       </div>
       <div class="xp-track">
         <div class="xp-fill" id="xpFill" style="width:0%"></div>
       </div>
+      <div class="xp-next" id="xpNext"></div>
     </div>
-    <div class="section-title">Leçons du jour</div>
+
+    <div class="section-title-row">
+      <div class="section-title">Tes leçons</div>
+      <div class="section-counter" id="lessonCounter">0 / 13</div>
+    </div>
     <div class="lessons-grid" id="lessonsGrid"></div>
-    <div class="section-title">Défi du jour</div>
-    <div class="daily-card" onclick="startLesson('defi')">
+
+    <div class="section-title">Défis</div>
+    <div class="daily-card" onclick="startDaily()">
       <div class="daily-icon">⚡</div>
       <div class="daily-text">
-        <div class="daily-title">5 minutes chrono</div>
-        <div class="daily-sub">Maintiens ton streak · +50 XP</div>
+        <div class="daily-title">Défi du jour</div>
+        <div class="daily-sub" id="dailySub">10 questions chrono · +50 XP</div>
+      </div>
+      <div class="daily-arrow">›</div>
+    </div>
+    <div class="daily-card practice-card" onclick="go('s-practice')">
+      <div class="daily-icon">♻️</div>
+      <div class="daily-text">
+        <div class="daily-title">Mode révision</div>
+        <div class="daily-sub">Révise les leçons complétées</div>
       </div>
       <div class="daily-arrow">›</div>
     </div>
@@ -121,7 +168,7 @@
   ══════════════════════════════════════════ -->
   <div class="screen" id="s-lesson">
     <div class="lesson-header">
-      <button class="back-btn" onclick="go('s-dash')">‹</button>
+      <button class="back-btn" onclick="quitLesson()">‹</button>
       <div class="test-progress" style="flex:1">
         <div class="test-bar" id="lesson-bar" style="width:0%"></div>
       </div>
@@ -137,7 +184,7 @@
   ══════════════════════════════════════════ -->
   <div class="screen" id="s-lesson-done">
     <div class="done-ring">🏆</div>
-    <div class="done-title">Leçon terminée !</div>
+    <div class="done-title" id="doneTitle">Leçon terminée !</div>
     <div class="done-desc" id="done-desc"></div>
     <div class="stats-row" style="margin-bottom:0">
       <div class="stat-card">
@@ -154,8 +201,193 @@
       </div>
     </div>
     <button class="nav-btn primary" onclick="go('s-dash')">Retour au menu →</button>
-    <button class="nav-btn secondary" onclick="replayLesson()">Rejouer cette leçon 🔄</button>
+    <button class="nav-btn secondary" onclick="replayLesson()">Rejouer 🔄</button>
   </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 8 — GAME OVER (plus de cœurs)
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-gameover">
+    <div class="gameover-icon">💔</div>
+    <div class="done-title">Plus de cœurs !</div>
+    <div class="done-desc">Tu as épuisé tes 3 cœurs. Réessaie cette leçon pour la maîtriser.</div>
+    <div class="stats-row" style="margin-bottom:0">
+      <div class="stat-card">
+        <div class="stat-val" id="go-q">0</div>
+        <div class="stat-lbl">Questions vues</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="go-correct">0</div>
+        <div class="stat-lbl">Bonnes</div>
+      </div>
+    </div>
+    <button class="nav-btn primary" onclick="replayLesson()">Réessayer 🔄</button>
+    <button class="nav-btn secondary" onclick="go('s-dash')">Retour menu</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 9 — LEVEL UP
+  ══════════════════════════════════════════ -->
+  <div class="screen" id="s-levelup">
+    <div class="levelup-burst"></div>
+    <div class="levelup-emoji">🎉</div>
+    <div class="levelup-tag">NOUVEAU PALIER !</div>
+    <div class="levelup-title" id="levelupTitle">Tu as débloqué une catégorie</div>
+    <div class="levelup-desc" id="levelupDesc">Continue ta progression pour découvrir d'autres leçons.</div>
+    <button class="nav-btn primary" onclick="go('s-dash')">Continuer →</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 10 — PROFIL
+  ══════════════════════════════════════════ -->
+  <div class="screen has-bottom-nav" id="s-profile">
+    <div class="profile-header">
+      <div class="avatar" id="profileAvatar">🌱</div>
+      <div class="profile-name" id="profileName">Amigo</div>
+      <div class="profile-level" id="profileLevel">Débutant · A0</div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="pstat">
+        <div class="pstat-icon">⚡</div>
+        <div class="pstat-val" id="pstatXp">0</div>
+        <div class="pstat-lbl">XP total</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-icon">🔥</div>
+        <div class="pstat-val" id="pstatStreak">0</div>
+        <div class="pstat-lbl">Streak</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-icon">📚</div>
+        <div class="pstat-val" id="pstatLessons">0</div>
+        <div class="pstat-lbl">Leçons</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-icon">🏆</div>
+        <div class="pstat-val" id="pstatBadges">0</div>
+        <div class="pstat-lbl">Badges</div>
+      </div>
+    </div>
+
+    <div class="section-title">Badges</div>
+    <div class="badges-grid" id="badgesGrid"></div>
+
+    <div class="section-title">Réglages</div>
+    <div class="settings-list">
+      <div class="setting-row" onclick="editName()">
+        <span class="setting-icon">✏️</span>
+        <div class="setting-text">
+          <div class="setting-name">Mon prénom</div>
+          <div class="setting-sub" id="settingNameVal">Amigo</div>
+        </div>
+        <span class="setting-arrow">›</span>
+      </div>
+      <div class="setting-row" onclick="toggleSound()">
+        <span class="setting-icon">🔊</span>
+        <div class="setting-text">
+          <div class="setting-name">Effets sonores</div>
+          <div class="setting-sub" id="settingSoundVal">Activés</div>
+        </div>
+        <span class="setting-arrow" id="soundToggle">●○</span>
+      </div>
+      <div class="setting-row" onclick="toggleHaptics()">
+        <span class="setting-icon">📳</span>
+        <div class="setting-text">
+          <div class="setting-name">Vibrations</div>
+          <div class="setting-sub" id="settingHapticsVal">Activées</div>
+        </div>
+        <span class="setting-arrow" id="hapticsToggle">●○</span>
+      </div>
+      <div class="setting-row" onclick="changeGoal()">
+        <span class="setting-icon">🎯</span>
+        <div class="setting-text">
+          <div class="setting-name">Objectif quotidien</div>
+          <div class="setting-sub" id="settingGoalVal">20 XP / jour</div>
+        </div>
+        <span class="setting-arrow">›</span>
+      </div>
+      <div class="setting-row" onclick="retakeTest()">
+        <span class="setting-icon">📝</span>
+        <div class="setting-text">
+          <div class="setting-name">Refaire le test de niveau</div>
+          <div class="setting-sub">Recalibre ton parcours</div>
+        </div>
+        <span class="setting-arrow">›</span>
+      </div>
+      <div class="setting-row danger" onclick="confirmReset()">
+        <span class="setting-icon">🗑️</span>
+        <div class="setting-text">
+          <div class="setting-name">Réinitialiser ma progression</div>
+          <div class="setting-sub">Supprime toutes les données</div>
+        </div>
+        <span class="setting-arrow">›</span>
+      </div>
+    </div>
+    <div class="profile-footer">Habla · v1.0 beta</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ÉCRAN 11 — PRACTICE (Mode révision)
+  ══════════════════════════════════════════ -->
+  <div class="screen has-bottom-nav" id="s-practice">
+    <div class="dash-header">
+      <div>
+        <div class="dash-greet">Mode révision ♻️</div>
+        <div class="dash-name">Renforce tes acquis</div>
+      </div>
+    </div>
+    <div class="practice-empty" id="practiceEmpty" style="display:none">
+      <div class="practice-empty-icon">📚</div>
+      <div class="practice-empty-title">Aucune leçon à réviser</div>
+      <div class="practice-empty-desc">Complète au moins une leçon pour pouvoir la réviser ici.</div>
+      <button class="nav-btn primary" onclick="go('s-dash')">Commencer une leçon</button>
+    </div>
+    <div class="practice-content" id="practiceContent">
+      <div class="practice-hero" onclick="startReview('all')">
+        <div class="practice-hero-icon">🎯</div>
+        <div>
+          <div class="practice-hero-title">Révision mixte</div>
+          <div class="practice-hero-sub">10 questions aléatoires de tes leçons</div>
+        </div>
+        <div class="daily-arrow">›</div>
+      </div>
+      <div class="section-title">Par catégorie</div>
+      <div class="lessons-grid" id="reviewGrid"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       MODAL — Édition prénom / objectif
+  ══════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="modal" onclick="closeModalIfBg(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-title" id="modalTitle">Titre</div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions">
+        <button class="nav-btn secondary" onclick="closeModal()">Annuler</button>
+        <button class="nav-btn primary" id="modalConfirm" onclick="confirmModal()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       BOTTOM NAV
+  ══════════════════════════════════════════ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item" data-screen="s-dash" onclick="go('s-dash')">
+      <span class="nav-ico">🏠</span>
+      <span class="nav-lbl">Accueil</span>
+    </button>
+    <button class="nav-item" data-screen="s-practice" onclick="go('s-practice')">
+      <span class="nav-ico">♻️</span>
+      <span class="nav-lbl">Révision</span>
+    </button>
+    <button class="nav-item" data-screen="s-profile" onclick="go('s-profile')">
+      <span class="nav-ico">👤</span>
+      <span class="nav-lbl">Profil</span>
+    </button>
+  </nav>
 
   <!-- ── Scripts (ordre important) ── -->
   <script src="js/questions.js"></script>
