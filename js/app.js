@@ -606,3 +606,22 @@ function shuffleArr(arr) {
    INIT AU CHARGEMENT
 ────────────────────────────────────────── */
 loadState();
+
+/* ──────────────────────────────────────────
+   AUTO-REDIRECT : si déjà joué → dashboard
+────────────────────────────────────────── */
+(function initApp() {
+  const saved = localStorage.getItem('habla_state');
+  if (!saved) return; // première visite → splash normal
+
+  try {
+    const parsed = JSON.parse(saved);
+    // A déjà passé le test si userLevel est défini
+    if (parsed.userLevel) {
+      document.getElementById('s-splash').classList.remove('active');
+      document.getElementById('s-dash').classList.add('active');
+      RUNTIME.currentScreen = 's-dash';
+      renderDash();
+    }
+  } catch(e) {}
+})();
